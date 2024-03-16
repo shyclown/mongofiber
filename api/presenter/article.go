@@ -21,7 +21,7 @@ func ArticleSuccessResponse(data *entities.Article) *fiber.Map {
 		ID:          data.ID,
 		Title:       data.Title,
 		Description: data.Description,
-		Content:     data.Description,
+		Content:     data.Content,
 	}
 	return &fiber.Map{
 		"status": true,

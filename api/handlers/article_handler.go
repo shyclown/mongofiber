@@ -80,12 +80,12 @@ func UpdateArticle(service article.Service) fiber.Handler {
 			return c.JSON(presenter.ArticleErrorResponse(err))
 		}
 
-		if requestBody.Title == "" || requestBody.Description == "" || requestBody.Content == "" {
+		if requestBody.ID.String() == "" || requestBody.Title == "" || requestBody.Description == "" || requestBody.Content == "" {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(errors.New(
 				"Please specify title, description and content")))
 		}
-		result, err := service.InsertArticle(&requestBody)
+		result, err := service.UpdateArticle(&requestBody)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(err))
