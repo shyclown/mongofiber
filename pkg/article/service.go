@@ -10,6 +10,7 @@ import (
 type Service interface {
 	InsertArticle(article *entities.Article) (*entities.Article, error)
 	FetchArticles() (*[]presenter.Article, error)
+	FetchArticle(ID uuid.UUID) (*entities.Article, error)
 	UpdateArticle(article *entities.Article) (*entities.Article, error)
 	RemoveArticle(ID uuid.UUID) error
 }
@@ -30,9 +31,14 @@ func (s *service) InsertArticle(item *entities.Article) (*entities.Article, erro
 	return s.repository.InsertArticle(item)
 }
 
-// FetchArticles is a service layer that helps fetch all items in ArticleShop
+// FetchArticles is a service layer that helps fetch all articles
 func (s *service) FetchArticles() (*[]presenter.Article, error) {
 	return s.repository.FetchArticles()
+}
+
+// FetchArticle is a service layer that helps fetch single article
+func (s *service) FetchArticle(ID uuid.UUID) (*entities.Article, error) {
+	return s.repository.FetchArticle(ID)
 }
 
 // UpdateArticle is a service layer that helps update items in ArticleShop

@@ -1,7 +1,6 @@
 package article
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"mongofiber/api/presenter"
 	"mongofiber/database"
@@ -11,6 +10,7 @@ import (
 type Repository interface {
 	InsertArticle(article *entities.Article) (*entities.Article, error)
 	FetchArticles() (*[]presenter.Article, error)
+	FetchArticle(ID uuid.UUID) (*entities.Article, error)
 	UpdateArticle(article *entities.Article) (*entities.Article, error)
 	DeleteArticle(ID uuid.UUID) error
 }
@@ -45,7 +45,6 @@ func (r *repository) InsertArticle(article *entities.Article) (*entities.Article
 }
 
 func (r *repository) FetchArticles() (*[]presenter.Article, error) {
-	fmt.Printf("Cursor")
 
 	var result []presenter.Article
 
@@ -68,6 +67,31 @@ func (r *repository) FetchArticles() (*[]presenter.Article, error) {
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *repository) FetchArticle(ID uuid.UUID) (*entities.Article, error) {
+
+	var result []entities.Article
+
+	rows, err := database.DB.Query(
+		"SELECT id, title, description, content FROM articles WHERE id=?", ID.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		article := entities.Article{}
+		if err := rows.Scan(&article.ID, &article.Title, &article.Description, &article.Content); err != nil {
+			return nil, err
+		}
+		result = append(result, article)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return &result[0], nil
 }
 
 func (r *repository) UpdateArticle(item *entities.Article) (*entities.Article, error) {

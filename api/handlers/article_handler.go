@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"mongofiber/api/presenter"
 	"mongofiber/pkg/article"
@@ -25,35 +26,36 @@ func GetArticles(service article.Service) fiber.Handler {
 
 func GetArticle(service article.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var requestBody entities.Article
-		err := c.BodyParser(&requestBody)
+
+		id := c.Params("id")
+
+		parsedId, err := uuid.Parse(id)
+
 		if err != nil {
-			c.Status(http.StatusBadRequest)
-			return c.JSON(presenter.ArticleErrorResponse(err))
-		}
-		if requestBody.Title == "" || requestBody.Description == "" {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(errors.New(
-				"Please specify title and author")))
+				"Please specify id")))
 		}
-		result, err := service.FetchArticles()
+
+		result, err := service.FetchArticle(parsedId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(err))
 		}
-		return c.JSON(presenter.ArticlesSuccessResponse(result))
+		return c.JSON(presenter.ArticleSuccessResponse(result))
 	}
 }
 
 func AddArticle(service article.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.Article
-		err := c.BodyParser(&requestBody)
-		if err != nil {
+
+		if err := c.BodyParser(&requestBody); err != nil {
 			c.Status(http.StatusBadRequest)
 			return c.JSON(presenter.ArticleErrorResponse(err))
 		}
-		if requestBody.Title == "" || requestBody.Description == "" {
+
+		if requestBody.Title == "" || requestBody.Description == "" || requestBody.Content == "" {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(errors.New(
 				"Please specify title and author")))
@@ -72,15 +74,16 @@ func AddArticle(service article.Service) fiber.Handler {
 func UpdateArticle(service article.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.Article
-		err := c.BodyParser(&requestBody)
-		if err != nil {
+
+		if err := c.BodyParser(&requestBody); err != nil {
 			c.Status(http.StatusBadRequest)
 			return c.JSON(presenter.ArticleErrorResponse(err))
 		}
-		if requestBody.Title == "" || requestBody.Description == "" {
+
+		if requestBody.Title == "" || requestBody.Description == "" || requestBody.Content == "" {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(errors.New(
-				"Please specify title and author")))
+				"Please specify title, description and content")))
 		}
 		result, err := service.InsertArticle(&requestBody)
 		if err != nil {
