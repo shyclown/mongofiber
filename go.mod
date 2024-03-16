@@ -3,12 +3,14 @@ module mongofiber
 go 1.22
 
 require (
+	github.com/go-sql-driver/mysql v1.8.0
 	github.com/gofiber/fiber/v2 v2.52.1
 	github.com/pkg/errors v0.9.1
 	go.mongodb.org/mongo-driver v1.14.0
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.5.0 // indirect
