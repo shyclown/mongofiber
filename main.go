@@ -14,6 +14,8 @@ func main() {
 
 	database.Connect()
 
+	database.RunMigration()
+
 	articleTable := "articles"
 	articleRepo := article.NewRepo(articleTable)
 	articleService := article.NewService(articleRepo)

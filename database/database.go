@@ -25,7 +25,7 @@ func Connect() {
 	db, err := sql.Open(
 		"mysql",
 		fmt.Sprintf(
-			"%s:%s@tcp(%s:%s)/%s",
+			"%s:%s@tcp(%s:%s)/%s?multiStatements=true",
 			user, password, host, port, dbname,
 		))
 
@@ -46,4 +46,5 @@ func Connect() {
 	DB = db
 
 	fmt.Println("😁 Connected to database")
+
 }
