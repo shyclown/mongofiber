@@ -41,6 +41,7 @@ func (r *repository) InsertArticle(article *entities.Article) (*entities.Article
 }
 
 func (r *repository) FetchArticles() (*[]presenter.Article, error) {
+
 	rows, err := database.DB.Query(
 		"SELECT id, title, description, content FROM articles LIMIT 10",
 	)
@@ -94,7 +95,12 @@ func (r *repository) UpdateArticle(article *entities.Article) (*entities.Article
 	return article, nil
 }
 
-func (r *repository) DeleteArticle(id uuid.UUID) error {
-	//TODO implement me
-	panic("implement me")
+func (r *repository) DeleteArticle(ID uuid.UUID) error {
+	_, err := database.DB.Query(
+		"DELETE * FROM articles WHERE id=?", ID.String(),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }

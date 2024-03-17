@@ -85,7 +85,9 @@ func UpdateArticle(service article.Service) fiber.Handler {
 			return c.JSON(presenter.ArticleErrorResponse(errors.New(
 				"Please specify title, description and content")))
 		}
+
 		result, err := service.UpdateArticle(&requestBody)
+
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(err))
@@ -96,13 +98,15 @@ func UpdateArticle(service article.Service) fiber.Handler {
 
 func RemoveArticle(service article.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var requestBody entities.Article
-		err := c.BodyParser(&requestBody)
+		id := c.Params("id")
+		articleId, err := uuid.Parse(id)
+
 		if err != nil {
 			c.Status(http.StatusBadRequest)
-			return c.JSON(presenter.ArticleErrorResponse(err))
+			return c.JSON(presenter.ArticleErrorResponse(errors.New(
+				"Please specify id")))
 		}
-		articleId := requestBody.ID
+
 		err = service.RemoveArticle(articleId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
@@ -110,7 +114,7 @@ func RemoveArticle(service article.Service) fiber.Handler {
 		}
 		return c.JSON(&fiber.Map{
 			"status": true,
-			"data":   "updated successfully",
+			"data":   "deleted successfully",
 			"err":    nil,
 		})
 	}
