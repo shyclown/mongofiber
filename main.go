@@ -4,21 +4,27 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 	"log"
 	"mongofiber/api/routes"
 	"mongofiber/database"
 	"mongofiber/pkg/article"
 	"mongofiber/pkg/item"
+	"os"
 )
 
 func main() {
 
 	// load .env file
-	//err := godotenv.Load(".env")
-	//if err != nil {
-	//	log.Fatalf("Error loading .env file")
-	//}
-	//fmt.Println("Environment loaded: ", os.Getenv("ENVIRONMENT"))
+	err := godotenv.Load(".env")
+	if err != nil {
+		err := godotenv.Load(".env.local")
+		if err != nil {
+			log.Fatalf("Error loading .env file")
+		}
+	}
+
+	host := os.Getenv("HOST") + ":" + os.Getenv("PORT")
 
 	database.Connect()
 	database.RunMigration()
@@ -37,7 +43,6 @@ func main() {
 	api := app.Group("/api")
 	routes.ArticleRouter(api, articleService)
 	routes.ItemRouter(api, itemService)
-	//defer cancel()
-	// log.Fatal(app.Listen("0.0.0.0:8080"))
-	log.Fatal(app.Listen("localhost:8080"))
+
+	log.Fatal(app.Listen(host))
 }
