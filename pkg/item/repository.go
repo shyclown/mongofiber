@@ -1,77 +1,105 @@
 package item
 
 import (
-	"context"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/google/uuid"
 	"mongofiber/api/presenter"
+	"mongofiber/database"
 	"mongofiber/pkg/entities"
-	"time"
 )
 
 // Repository interface allows us to access the CRUD Operations in mongo here.
 type Repository interface {
 	CreateItem(item *entities.Item) (*entities.Item, error)
-	ReadItem() (*[]presenter.Item, error)
+	ReadItems() (*[]presenter.Item, error)
+	ReadItem(ID uuid.UUID) (*entities.Item, error)
 	UpdateItem(item *entities.Item) (*entities.Item, error)
-	DeleteItem(ID string) error
+	DeleteItem(ID uuid.UUID) error
 }
+
 type repository struct {
-	Collection *mongo.Collection
+	Table string
 }
 
 // NewRepo is the single instance repo that is being created.
-func NewRepo(collection *mongo.Collection) Repository {
+func NewRepo(table string) Repository {
 	return &repository{
-		Collection: collection,
+		Table: table,
 	}
 }
 
 // CreateItem is a mongo repository that helps to create items
 func (r *repository) CreateItem(item *entities.Item) (*entities.Item, error) {
-	item.ID = primitive.NewObjectID()
-	item.CreatedAt = time.Now()
-	item.UpdatedAt = time.Now()
-	_, err := r.Collection.InsertOne(context.Background(), item)
+	item.Id = uuid.New()
+	_, err := database.DB.Query(
+		"INSERT INTO items (id, title, description, entity_id, entity_type) VALUES (?, ?, ?, ?, ?)",
+		item.Id, item.Title, item.Description, item.EntityId, item.EntityType,
+	)
 	if err != nil {
 		return nil, err
 	}
 	return item, nil
 }
 
-// ReadItem is a mongo repository that helps to fetch items
-func (r *repository) ReadItem() (*[]presenter.Item, error) {
-	var items []presenter.Item
-	cursor, err := r.Collection.Find(context.Background(), bson.D{})
+func (r *repository) ReadItems() (*[]presenter.Item, error) {
+
+	rows, err := database.DB.Query(
+		"SELECT id, title, description, entity_id, entity_type FROM items LIMIT 10",
+	)
 	if err != nil {
 		return nil, err
 	}
-	for cursor.Next(context.TODO()) {
-		var item presenter.Item
-		_ = cursor.Decode(&item)
-		items = append(items, item)
+	var result []presenter.Item
+	for rows.Next() {
+		item := presenter.Item{}
+		if err := rows.Scan(&item.Id, &item.Title, &item.Description); err != nil {
+			return nil, err
+		}
+		result = append(result, item)
 	}
-	return &items, nil
+	if err != nil {
+
+		return nil, err
+	}
+	return &result, nil
 }
 
-// UpdateItem is a mongo repository that helps to update items
+func (r *repository) ReadItem(ID uuid.UUID) (*entities.Item, error) {
+	rows, err := database.DB.Query(
+		"SELECT id, title, description, entity_id, entity_type FROM items WHERE id=?", ID.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	var result []entities.Item
+	for rows.Next() {
+		item := entities.Item{}
+		if err := rows.Scan(&item.Id, &item.Title, &item.Description); err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &result[0], nil
+}
+
 func (r *repository) UpdateItem(item *entities.Item) (*entities.Item, error) {
-	item.UpdatedAt = time.Now()
-	_, err := r.Collection.UpdateOne(context.Background(), bson.M{"_id": item.ID}, bson.M{"$set": item})
+	_, err := database.DB.Query(
+		"UPDATE items SET title = ?, description = ? WHERE id = ?",
+		item.Title, item.Description, item.Id,
+	)
 	if err != nil {
 		return nil, err
 	}
 	return item, nil
 }
 
-// DeleteItem is a mongo repository that helps to delete items
-func (r *repository) DeleteItem(ID string) error {
-	itemID, err := primitive.ObjectIDFromHex(ID)
-	if err != nil {
-		return err
-	}
-	_, err = r.Collection.DeleteOne(context.Background(), bson.M{"_id": itemID})
+func (r *repository) DeleteItem(ID uuid.UUID) error {
+	_, err := database.DB.Query(
+		"DELETE FROM items WHERE id=?",
+		ID.String(),
+	)
 	if err != nil {
 		return err
 	}

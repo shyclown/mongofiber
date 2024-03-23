@@ -4,7 +4,10 @@ CREATE TABLE IF NOT EXISTS items
     title       VARCHAR(36)  null,
     description VARCHAR(128) null,
     entity_type VARCHAR(16)  not null,
-    entity_id   VARCHAR(36)  not null unique
+    entity_id   VARCHAR(36)  not null unique,
+    created_at   TIMESTAMP  not null default CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP  not null default CURRENT_TIMESTAMP,
+    deleted_at   TIMESTAMP  null
 );
 
 CREATE TABLE IF NOT EXISTS item_elements

@@ -1,20 +1,20 @@
 package entities
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/google/uuid"
 	"time"
 )
 
-// Item Constructs your Item model under entities.
 type Item struct {
-	ID        primitive.ObjectID `json:"id"  bson:"_id,omitempty"`
-	Title     string             `json:"title" bson:"title"`
-	Author    string             `json:"author" bson:"author,omitempty"`
-	CreatedAt time.Time          `json:"createdAt" bson:"createdAt"`
-	UpdatedAt time.Time          `json:"updatedAt" bson:"updatedAt"`
+	Id          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	EntityId    uuid.UUID `json:"entityId"`
+	EntityType  string    `json:"entityType"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-// DeleteRequest struct is used to parse Delete Requests for Items
 type DeleteRequest struct {
 	ID string `json:"id"`
 }
