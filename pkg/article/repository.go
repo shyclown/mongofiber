@@ -19,8 +19,6 @@ type repository struct {
 	Table string
 }
 
-var table string = "articles"
-
 // NewRepo is the single instance repo that is being created.
 func NewRepo(table string) Repository {
 	return &repository{
@@ -97,7 +95,7 @@ func (r *repository) UpdateArticle(article *entities.Article) (*entities.Article
 
 func (r *repository) DeleteArticle(ID uuid.UUID) error {
 	_, err := database.DB.Query(
-		"DELETE * FROM articles WHERE id=?", ID.String(),
+		"DELETE FROM articles WHERE id=?", ID.String(),
 	)
 	if err != nil {
 		return err

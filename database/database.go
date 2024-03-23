@@ -12,7 +12,8 @@ var DB *sql.DB
 
 // Database settings
 const (
-	host     = "localhost"
+	host = "localhost"
+	//host     = "host.docker.internal"
 	port     = "3306"
 	user     = "root"
 	password = ""
