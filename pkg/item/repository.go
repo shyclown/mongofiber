@@ -51,7 +51,7 @@ func (r *repository) ReadItems() (*[]presenter.Item, error) {
 	var result []presenter.Item
 	for rows.Next() {
 		item := presenter.Item{}
-		if err := rows.Scan(&item.Id, &item.Title, &item.Description); err != nil {
+		if err := rows.Scan(&item.Id, &item.Title, &item.Description, &item.EntityId, &item.EntityType); err != nil {
 			return nil, err
 		}
 		result = append(result, item)
@@ -73,7 +73,7 @@ func (r *repository) ReadItem(ID uuid.UUID) (*entities.Item, error) {
 	var result []entities.Item
 	for rows.Next() {
 		item := entities.Item{}
-		if err := rows.Scan(&item.Id, &item.Title, &item.Description); err != nil {
+		if err := rows.Scan(&item.Id, &item.Title, &item.Description, &item.EntityId, &item.EntityType); err != nil {
 			return nil, err
 		}
 		result = append(result, item)
