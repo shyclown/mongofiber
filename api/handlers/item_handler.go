@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"mongofiber/api/presenter"
 	"mongofiber/pkg/entities"
@@ -9,21 +11,58 @@ import (
 	"net/http"
 )
 
-// AddItem is handler/controller which creates Items in the ItemShop
+func GetItems(service item.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		results, err := service.FetchItems()
+		if err != nil {
+			fmt.Println("Error calling service")
+			c.Status(http.StatusInternalServerError)
+			return c.JSON(presenter.ItemErrorResponse(err))
+		}
+		return c.JSON(presenter.ItemsSuccessResponse(results))
+	}
+}
+
+func GetItem(service item.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+
+		id := c.Params("id")
+
+		parsedId, err := uuid.Parse(id)
+
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return c.JSON(presenter.ItemErrorResponse(errors.New(
+				"Please specify id")))
+		}
+
+		result, err := service.FetchItem(parsedId)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return c.JSON(presenter.ItemErrorResponse(err))
+		}
+		return c.JSON(presenter.ItemSuccessResponse(result))
+	}
+}
+
 func AddItem(service item.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.Item
-		err := c.BodyParser(&requestBody)
-		if err != nil {
+
+		if err := c.BodyParser(&requestBody); err != nil {
 			c.Status(http.StatusBadRequest)
 			return c.JSON(presenter.ItemErrorResponse(err))
 		}
-		if requestBody.Author == "" || requestBody.Title == "" {
+
+		if requestBody.Title == "" || requestBody.Description == "" {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ItemErrorResponse(errors.New(
-				"Please specify title and author")))
+				"Please specify title and description")))
 		}
+
 		result, err := service.InsertItem(&requestBody)
+
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ItemErrorResponse(err))
@@ -32,16 +71,23 @@ func AddItem(service item.Service) fiber.Handler {
 	}
 }
 
-// UpdateItem is handler/controller which updates data of Items in the ItemShop
 func UpdateItem(service item.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var requestBody entities.Item
-		err := c.BodyParser(&requestBody)
-		if err != nil {
+
+		if err := c.BodyParser(&requestBody); err != nil {
 			c.Status(http.StatusBadRequest)
 			return c.JSON(presenter.ItemErrorResponse(err))
 		}
+
+		if requestBody.Id.String() == "" || requestBody.Title == "" || requestBody.Description == "" {
+			c.Status(http.StatusInternalServerError)
+			return c.JSON(presenter.ItemErrorResponse(errors.New(
+				"Please specify title, description and content")))
+		}
+
 		result, err := service.UpdateItem(&requestBody)
+
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ItemErrorResponse(err))
@@ -50,37 +96,26 @@ func UpdateItem(service item.Service) fiber.Handler {
 	}
 }
 
-// RemoveItem is handler/controller which removes Items from the ItemShop
 func RemoveItem(service item.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var requestBody entities.DeleteRequest
-		err := c.BodyParser(&requestBody)
+		id := c.Params("id")
+		itemId, err := uuid.Parse(id)
+
 		if err != nil {
 			c.Status(http.StatusBadRequest)
-			return c.JSON(presenter.ItemErrorResponse(err))
+			return c.JSON(presenter.ItemErrorResponse(errors.New(
+				"Please specify id")))
 		}
-		itemID := requestBody.ID
-		err = service.RemoveItem(itemID)
+
+		err = service.RemoveItem(itemId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ItemErrorResponse(err))
 		}
 		return c.JSON(&fiber.Map{
 			"status": true,
-			"data":   "updated successfully",
+			"data":   "deleted successfully",
 			"err":    nil,
 		})
-	}
-}
-
-// GetItems is handler/controller which lists all Items from the ItemShop
-func GetItems(service item.Service) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		fetched, err := service.FetchItems()
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return c.JSON(presenter.ItemErrorResponse(err))
-		}
-		return c.JSON(presenter.ItemsSuccessResponse(fetched))
 	}
 }

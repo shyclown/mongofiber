@@ -2,24 +2,30 @@ package presenter
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/google/uuid"
 	"mongofiber/pkg/entities"
+	"time"
 )
 
-// Item is the presenter object which will be passed in the response by Handler
 type Item struct {
-	ID     primitive.ObjectID `json:"id" bson:"_id,omitempty"`
-	Title  string             `json:"title"`
-	Author string             `json:"author"`
+	Id          uuid.UUID `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	EntityId    uuid.UUID `json:"entityId"`
+	EntityType  string    `json:"entityType"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
-// ItemSuccessResponse is the singular SuccessResponse that will be passed in the response by
-// Handler
 func ItemSuccessResponse(data *entities.Item) *fiber.Map {
 	Item := Item{
-		ID:     data.ID,
-		Title:  data.Title,
-		Author: data.Author,
+		Id:          data.Id,
+		Title:       data.Title,
+		Description: data.Description,
+		EntityType:  data.EntityType,
+		EntityId:    data.EntityId,
+		CreatedAt:   data.CreatedAt,
+		UpdatedAt:   data.UpdatedAt,
 	}
 	return &fiber.Map{
 		"status": true,
