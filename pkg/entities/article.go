@@ -8,7 +8,3 @@ type Article struct {
 	Description string    `json:"description"`
 	Content     string    `json:"content"`
 }
-
-type Articles struct {
-	Employees []Article `json:"article"`
-}
