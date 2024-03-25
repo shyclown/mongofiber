@@ -12,6 +12,7 @@ type Service interface {
 	FetchItem(ID uuid.UUID) (*entities.Item, error)
 	UpdateItem(item *entities.Item) (*entities.Item, error)
 	RemoveItem(ID uuid.UUID) error
+	GetItemByEntityId(entityId uuid.UUID) (*entities.Item, error)
 }
 
 type service struct {
@@ -38,4 +39,7 @@ func (s *service) UpdateItem(item *entities.Item) (*entities.Item, error) {
 }
 func (s *service) RemoveItem(ID uuid.UUID) error {
 	return s.repository.DeleteItem(ID)
+}
+func (s *service) GetItemByEntityId(entityId uuid.UUID) (*entities.Item, error) {
+	return s.repository.GetItemByEntityId(entityId)
 }

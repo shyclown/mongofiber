@@ -16,16 +16,10 @@ type Article struct {
 
 // ArticleSuccessResponse is the singular SuccessResponse that will be passed in the response by
 // Handler
-func ArticleSuccessResponse(data *entities.Article) *fiber.Map {
-	Article := Article{
-		ID:          data.ID,
-		Title:       data.Title,
-		Description: data.Description,
-		Content:     data.Content,
-	}
+func ArticleSuccessResponse(article *entities.Article) *fiber.Map {
 	return &fiber.Map{
 		"status": true,
-		"data":   Article,
+		"data":   article,
 		"error":  nil,
 	}
 }

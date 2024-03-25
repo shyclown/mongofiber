@@ -14,7 +14,7 @@ import (
 func GetArticles(service article.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
-		results, err := service.FetchArticles()
+		results, err := service.ReadArticles()
 		if err != nil {
 			fmt.Println("Error calling service")
 			c.Status(http.StatusInternalServerError)
@@ -37,7 +37,7 @@ func GetArticle(service article.Service) fiber.Handler {
 				"Please specify id")))
 		}
 
-		result, err := service.FetchArticle(parsedId)
+		result, err := service.ReadArticle(parsedId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(err))
@@ -61,13 +61,13 @@ func AddArticle(service article.Service) fiber.Handler {
 				"Please specify title and author")))
 		}
 
-		result, err := service.InsertArticle(&requestBody)
+		resultArticle, err := service.CreateArticle(&requestBody)
 
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(err))
 		}
-		return c.JSON(presenter.ArticleSuccessResponse(result))
+		return c.JSON(presenter.ArticleSuccessResponse(resultArticle))
 	}
 }
 
@@ -107,7 +107,7 @@ func RemoveArticle(service article.Service) fiber.Handler {
 				"Please specify id")))
 		}
 
-		err = service.RemoveArticle(articleId)
+		err = service.DeleteArticle(articleId)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			return c.JSON(presenter.ArticleErrorResponse(err))
