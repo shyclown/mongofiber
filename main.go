@@ -28,21 +28,15 @@ func main() {
 
 	database.Connect()
 	database.RunMigration()
-
-	articleTable := "articles"
-	articleRepo := article.NewRepo(articleTable)
-	articleService := article.NewService(articleRepo)
-
-	itemTable := "items"
-	itemRepo := item.NewRepo(itemTable)
-	itemService := item.NewService(itemRepo)
+	articleServiceInstance := article.NewService(article.NewRepo("articles"))
+	itemServiceInstance := item.NewService(item.NewRepo("items"))
 
 	app := fiber.New()
 	app.Use(cors.New())
 
 	api := app.Group("/api")
-	routes.ArticleRouter(api, articleService)
-	routes.ItemRouter(api, itemService)
+	routes.ArticleRouter(api, articleServiceInstance)
+	routes.ItemRouter(api, itemServiceInstance)
 
 	log.Fatal(app.Listen(host))
 }
